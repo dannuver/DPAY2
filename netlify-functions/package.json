@@ -1,0 +1,19 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "description": "Aquí irá el código fuente de las funciones serverless para el backend off-chain usando Netlify Functions.",
+  "main": "offramp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@axelar-network/axelarjs-sdk": "^0.17.4",
+    "dotenv": "^17.2.0",
+    "jest": "^30.0.4",
+    "node-fetch": "^3.3.2",
+    "stellar-sdk": "^13.3.0"
+  }
+}
