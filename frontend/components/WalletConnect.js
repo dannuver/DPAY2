@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StellarSdk from 'stellar-sdk';
 
 // Utilidad para generar un SEP-7 URI para firma de transacciones
@@ -24,7 +24,13 @@ export default function WalletConnect({ onWalletConnected }) {
   const [axelarAmount, setAxelarAmount] = useState('');
   const [axelarFee, setAxelarFee] = useState(0.15);
   const [axelarStatus, setAxelarStatus] = useState('');
-  const [sep10Token, setSep10Token] = useState(() => sessionStorage.getItem('sep10Token') || '');
+  const [sep10Token, setSep10Token] = useState('');
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('sep10Token');
+      if (token) setSep10Token(token);
+    }
+  }, []);
   const [sep7Uri, setSep7Uri] = useState('');
   const [sep24Url, setSep24Url] = useState('');
   const [showPuntoRed, setShowPuntoRed] = useState(false);
@@ -50,15 +56,19 @@ export default function WalletConnect({ onWalletConnected }) {
     } catch (e) {
       setBalance(0);
     }
-    const token = sessionStorage.getItem('sep10Token');
-    if (token) setSep10Token(token);
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('sep10Token');
+      if (token) setSep10Token(token);
+    }
   };
 
   const handleDisconnect = () => {
     setAddress('');
     setBalance(null);
     setSep10Token('');
-    sessionStorage.removeItem('sep10Token');
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('sep10Token');
+    }
     setStep('main');
     setShowAxelar(false);
     setShowPuntoRed(false);
@@ -72,7 +82,9 @@ export default function WalletConnect({ onWalletConnected }) {
     setTimeout(() => {
       const fakeToken = 'FAKE_SEP10_TOKEN_' + Math.random().toString(36).slice(2);
       setSep10Token(fakeToken);
-      sessionStorage.setItem('sep10Token', fakeToken);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('sep10Token', fakeToken);
+      }
       setTxStatus('Autenticación SEP-10 completada. Token seguro.');
     }, 2000);
   };
