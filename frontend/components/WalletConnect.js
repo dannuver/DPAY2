@@ -92,8 +92,7 @@ export default function WalletConnect({ onWalletConnected }) {
     const val = e.target.value;
     setAmount(val);
     const total = Number(val) + fees.stellar + fees.creit + fees.puntored + fees.axelar;
-          onClick={handleDisconnect}
-          style={{
+
             width: '100%',
             padding: '10px 0',
             borderRadius: 10,
