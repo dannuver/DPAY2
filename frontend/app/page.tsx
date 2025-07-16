@@ -13,8 +13,8 @@ const CHAINS = ["Ethereum", "Polygon", "Avalanche"];
 const ASSETS = ["USDC", "ETH", "MATIC"];
 
 export default function Home() {
-  const [wallet, setWallet] = useState(null);
-  const [balance, setBalance] = useState(null);
+  const [wallet, setWallet] = useState<string | null>(null);
+  const [balance, setBalance] = useState<string | null>(null);
   const [showTopUp, setShowTopUp] = useState(false);
   const [chain, setChain] = useState("");
   const [asset, setAsset] = useState("");
@@ -22,7 +22,7 @@ export default function Home() {
   const [fee, setFee] = useState("0.5");
   const [commission, setCommission] = useState("0.2");
   const [txStatus, setTxStatus] = useState("");
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<string[]>([]);
 
   const handleWalletConnected = (address: string) => {
     setWallet(address);
