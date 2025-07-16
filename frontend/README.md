@@ -16,7 +16,11 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Este proyecto usa la nueva estructura de rutas de Next.js en la carpeta `app/` (no se usa `pages/`).
+
+Las funciones backend (API) se implementan usando Netlify Functions, ubicadas en la carpeta `/netlify-functions` en la raíz del proyecto.
+
+Puedes empezar a editar la página principal en `app/page.tsx`. Los cambios se actualizan automáticamente.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
