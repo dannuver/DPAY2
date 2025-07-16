@@ -1,0 +1,10 @@
+// Estilos globales para la DApp
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f7f9fa;
+  margin: 0;
+  padding: 0;
+}
+h1 {
+  color: #1a237e;
+}

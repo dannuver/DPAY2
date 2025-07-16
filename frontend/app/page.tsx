@@ -1,95 +1,70 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import { useState } from "react";
+import WalletConnect from "../components/WalletConnect";
+import BalanceChecker from "../components/BalanceChecker";
+import TopUpOption from "../components/TopUpOption";
+import ChainSelector from "../components/ChainSelector";
+import AssetAmountInput from "../components/AssetAmountInput";
+import FeeSummary from "../components/FeeSummary";
+import TxStatus from "../components/TxStatus";
+import History from "../components/History";
+
+const CHAINS = ["Ethereum", "Polygon", "Avalanche"];
+const ASSETS = ["USDC", "ETH", "MATIC"];
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [wallet, setWallet] = useState(null);
+  const [balance, setBalance] = useState(null);
+  const [showTopUp, setShowTopUp] = useState(false);
+  const [chain, setChain] = useState("");
+  const [asset, setAsset] = useState("");
+  const [amount, setAmount] = useState("");
+  const [fee, setFee] = useState("0.5");
+  const [commission, setCommission] = useState("0.2");
+  const [txStatus, setTxStatus] = useState("");
+  const [history, setHistory] = useState([]);
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
+  const handleWalletConnected = (address: string) => {
+    setWallet(address);
+  };
+  const handleBalanceChecked = (bal: string) => {
+    setBalance(bal);
+    setShowTopUp(bal === "0");
+  };
+  const handleTopUp = () => {
+    setTxStatus("Recarga iniciada vía Axelar...");
+    // TODO: Lógica de recarga
+  };
+  const handleChainSelect = (selected: string) => setChain(selected);
+  const handleAssetAmountChange = (type: string, value: string) => {
+    if (type === "asset") setAsset(value);
+    if (type === "amount") setAmount(value);
+  };
+  const handleSignAndSend = () => {
+    setTxStatus("Transacción enviada a Stellar. Firmando...");
+    // TODO: Lógica de firma y envío
+    setTimeout(() => {
+      setTxStatus("Transacción completada");
+      setHistory((h) => [...h, `Tx ${Date.now()} - ${amount} ${asset} en ${chain}`]);
+    }, 2000);
+  };
+
+  return (
+    <div>
+      <main>
+        <h1>Bienvenido a la DApp Cross-Chain Pagos</h1>
+        <WalletConnect onWalletConnected={handleWalletConnected} />
+        {wallet && <BalanceChecker address={wallet} onBalanceChecked={handleBalanceChecked} />}
+        {showTopUp && <TopUpOption onTopUp={handleTopUp} />}
+        <ChainSelector chains={CHAINS} onSelect={handleChainSelect} />
+        <AssetAmountInput assets={ASSETS} onChange={handleAssetAmountChange} />
+        <FeeSummary fee={fee} commission={commission} />
+        <button onClick={handleSignAndSend} disabled={!wallet || !amount || !asset || !chain}>
+          Firmar y Enviar
+        </button>
+        <TxStatus status={txStatus} />
+        <History items={history} />
       </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
