@@ -1,4 +1,3 @@
-import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,4 +25,5 @@ export default function RootLayout({
         <Providers>{children}</Providers>
       </body>
     </html>
-
+  );
+}

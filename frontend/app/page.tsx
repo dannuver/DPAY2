@@ -1,24 +1,25 @@
-"use client";
-import { useState, useEffect } from "react";
-import { useStellarWalletsKit } from "@creit.tech/stellar-wallets-kit";
-import * as StellarSdk from "stellar-sdk";
 import BalanceChecker from "../components/BalanceChecker";
 import TopUpOption from "../components/TopUpOption";
 import ChainSelector from "../components/ChainSelector";
+import AssetAmountInput from "../components/AssetAmountInput";
+import FeeSummary from "../components/FeeSummary";
+import TxStatus from "../components/TxStatus";
 import History from "../components/History";
 
 const CHAINS = ["Ethereum", "Polygon", "Avalanche"];
-// USDC es ahora la opción principal, XLM es opcional.
-const ASSETS = ["USDC", "XLM"];
-
-// ¡IMPORTANTE! Esta es la dirección del emisor de USDC en la red de pruebas (Testnet) de Stellar.
 // Para la red principal (Pubnet), necesitarás una dirección de emisor diferente.
 const USDC_ISSUER_TESTNET = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
+
+interface Transaction {
+  hash: string;
+  amount: string;
+  asset: string;
+  timestamp: number;
+}
 
 export default function Home() {
   // Usaremos el kit de Stellar para manejar el estado de la billetera
   const kit = useStellarWalletsKit();
-
   const [balance, setBalance] = useState<string | null>(null); // Saldo (solo XLM por ahora)
   const [showTopUp, setShowTopUp] = useState(false);
   const [chain, setChain] = useState("");
@@ -27,24 +28,24 @@ export default function Home() {
   const [fee, setFee] = useState("0.5"); // Simulado
   const [commission, setCommission] = useState("0.2"); // Simulado
   const [txStatus, setTxStatus] = useState("");
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useState<Transaction[]>([]);
+
+  useEffect(() => {
+    const storedHistory = localStorage.getItem('dpay2-tx-history');
+    if (storedHistory) {
+      setHistory(JSON.parse(storedHistory));
+    }
+  }, []);
 
   const handleWalletConnected = (address: string) => {
     // Ya no es necesario, el kit maneja la conexión
-  };
-  const handleBalanceChecked = (bal: string) => {
     setBalance(bal);
     // Mostrar opción de recarga si el saldo de XLM es 0.
     // NOTA: Esto no comprueba el saldo de USDC.
-    setShowTopUp(bal === "0" || bal === null);
+    setShowTopUp(bal === "0" || bal === null || parseFloat(bal) < 1.5);
   };
   const handleTopUp = () => {
     setTxStatus("La función de recarga desde otras cadenas aún no está implementada.");
-    // TODO: Implementar la lógica de recarga con Axelar.
-    // Esto implicaría conectar una billetera EVM (con wagmi/ethers) y llamar al SDK de Axelar.
-  };
-  const handleChainSelect = (selected: string) => setChain(selected);
-  const handleAssetAmountChange = (type: string, value: string) => {
     if (type === "asset") setAsset(value);
     if (type === "amount") setAmount(value);
   };
@@ -93,8 +94,16 @@ export default function Home() {
 
       // 6. Enviar la transacción firmada a la red Stellar
       const result = await server.submitTransaction(signedTx.result);
+      const newTx: Transaction = {
+        hash: result.hash,
+        amount: amount,
+        asset: asset,
+        timestamp: Date.now(),
+      };
+      const newHistory = [newTx, ...history];
+      setHistory(newHistory);
       setTxStatus(`¡Transacción completada! Hash: ${result.hash.substring(0, 12)}...`);
-      setHistory((h) => [...h, `Tx ${result.hash.substring(0, 12)}... - ${amount} ${asset}`]);
+      localStorage.setItem('dpay2-tx-history', JSON.stringify(newHistory));
     } catch (error: any) {
       console.error("Error al firmar o enviar la transacción:", error);
       // Dar un mensaje más útil en caso de error de "trustline"
@@ -149,9 +158,11 @@ export default function Home() {
         {/* Estado e Historial de Transacciones */}
         <div style={{ marginTop: '1.5rem' }}>
           <TxStatus status={txStatus} />
-          <History items={history} />
+          <History
+            items={history.map(tx => `Tx: ${tx.hash.substring(0,12)}... - ${tx.amount} ${tx.asset}`)}
+          />
         </div>
       </main>
     </div>
   );
-
+}
