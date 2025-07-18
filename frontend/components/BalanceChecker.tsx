@@ -3,6 +3,9 @@
 import { useState, useEffect, FC } from 'react';
 import * as StellarSdk from "stellar-sdk";
 
+// ¡IMPORTANTE! Esta es la dirección del emisor de USDC en la red de pruebas (Testnet) de Stellar.
+const USDC_ISSUER_TESTNET = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
+
 interface BalanceCheckerProps {
   address: string;
   onBalanceChecked: (balances: { xlm: string; usdc: string }) => void;
@@ -19,17 +22,16 @@ const BalanceChecker: FC<BalanceCheckerProps> = ({ address, onBalanceChecked }) 
       setError(null);
       setBalances(null);
       const server = new StellarSdk.Server("https://horizon-testnet.stellar.org");
-      const USDC_ISSUER_TESTNET = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
-
+      
       try {
         const account = await server.loadAccount(address);
         const xlmBalance = account.balances.find(b => b.asset_type === 'native')?.balance ?? '0';
         const usdcBalance = account.balances.find(b => b.asset_type !== 'native' && b.asset_code === 'USDC' && b.asset_issuer === USDC_ISSUER_TESTNET)?.balance ?? '0';
+        
         const newBalances = { xlm: xlmBalance, usdc: usdcBalance };
         setBalances(newBalances);
         onBalanceChecked(newBalances);
       } catch (err: any) {
-        // Un error 404 es normal para una cuenta nueva sin fondos
         if (err?.response?.status === 404) {
           const zeroBalances = { xlm: '0', usdc: '0' };
           setBalances(zeroBalances);
@@ -37,6 +39,12 @@ const BalanceChecker: FC<BalanceCheckerProps> = ({ address, onBalanceChecked }) 
         } else {
           console.error("Error al obtener el saldo de Stellar:", err);
           setError("No se pudo obtener el saldo.");
+        }
+      }
+      setLoading(false);
+    };
+    checkBalance();
+  }, [address, onBalanceChecked]);
 
   return (
     <div>
@@ -52,3 +60,4 @@ const BalanceChecker: FC<BalanceCheckerProps> = ({ address, onBalanceChecked }) 
   );
 };
 
+export default BalanceChecker;
